@@ -1,0 +1,29 @@
+# Cloudflare Workers — Lama Stylers Cleanup Cron
+# Thay thế Netlify Scheduled Functions (Pro-only) bằng CF Workers (free).
+
+name               = "lama-stylers-cleanup"
+main               = "cleanup-cron.js"
+compatibility_date = "2024-01-01"
+
+[triggers]
+# 18:00 UTC = 01:00 GMT+7 (giờ VN) — chạy lúc nửa đêm khi traffic thấp
+crons = ["0 18 * * *"]
+
+[vars]
+# Sửa NETLIFY_SITE_URL thành domain thật của bạn
+NETLIFY_SITE_URL = "https://lama-stylers.netlify.app"
+# KHÔNG đặt CLEANUP_SECRET ở đây — dùng lệnh bên dưới để set secret
+
+# Hướng dẫn deploy:
+#   1. npm install -g wrangler
+#   2. wrangler login
+#   3. wrangler secret put CLEANUP_SECRET     ← nhập cùng giá trị với Netlify env
+#   4. wrangler deploy
+#   5. wrangler tail                          ← xem logs real-time
+#
+# Test thủ công:
+#   curl -X POST https://lama-stylers-cleanup.<account>.workers.dev/trigger \
+#     -H "Authorization: Bearer <CLEANUP_SECRET>"
+#
+# Tạo CLEANUP_SECRET ngẫu nhiên:
+#   openssl rand -hex 16

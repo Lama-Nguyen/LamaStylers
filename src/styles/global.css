@@ -1,0 +1,537 @@
+/* src/styles/global.css */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  /* ⚠️ FIX: dropdown <select>/<option> bị bôi TRẮNG chữ khó đọc trên mobile
+     — nguyên nhân là trình duyệt (đặc biệt iOS Safari) LUÔN render các
+     option bằng theme hệ thống mặc định (sáng), bỏ qua mọi CSS color/
+     background tùy chỉnh viết cho <option> — đây là giới hạn nền tảng,
+     không sửa được bằng cách chỉnh CSS thông thường. Cách đúng: khai báo
+     color-scheme để báo cho trình duyệt biết nên dùng theme TỐI cho MỌI
+     UI control gốc của hệ điều hành (select dropdown, scrollbar, date/time
+     picker...) — trình duyệt sẽ tự chọn màu chữ/nền tương phản hợp lý
+     theo theme tối thay vì mặc định sáng. */
+  color-scheme: dark;
+
+  --bg-primary: #0F0A1E;
+  --bg-card: #1A1230;
+  --bg-elevated: #241848;
+  --accent: #8B5CF6;
+  --accent-light: #A78BFA;
+  --accent-glow: rgba(139, 92, 246, 0.25);
+  --rose: #F43F5E;
+  --gold: #F59E0B;
+  --green: #10B981;
+  --text-primary: #F8F5FF;
+  --text-secondary: #A598C7;
+  --text-muted: #6B5E8A;
+  --border: rgba(139, 92, 246, 0.2);
+  --border-hover: rgba(139, 92, 246, 0.5);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --shadow-accent: 0 4px 24px rgba(139,92,246,0.3);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+a { color: inherit; text-decoration: none; }
+
+button { cursor: pointer; border: none; font-family: 'Inter', sans-serif; }
+
+input, textarea, select {
+  font-family: 'Inter', sans-serif;
+  outline: none;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 3px; }
+
+/* Utility classes */
+.container { max-width: 480px; margin: 0 auto; padding: 0 16px; }
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), #7C3AED);
+  color: white;
+  border-radius: 50px;
+  padding: 14px 28px;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-accent);
+  width: 100%;
+}
+.btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--accent-light);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 13px 28px;
+  font-weight: 500;
+  font-size: 15px;
+  transition: all 0.2s;
+  width: 100%;
+}
+.btn-secondary:hover { border-color: var(--accent); background: var(--accent-glow); }
+
+.btn-icon {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: all 0.2s;
+  font-size: 18px;
+}
+.btn-icon:hover { border-color: var(--accent); color: var(--accent-light); }
+
+.input-field {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  color: var(--text-primary);
+  font-size: 15px;
+  width: 100%;
+  transition: border-color 0.2s;
+}
+.input-field:focus { border-color: var(--accent); }
+.input-field::placeholder { color: var(--text-muted); }
+
+.label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.error-text { color: var(--rose); font-size: 13px; margin-top: 4px; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--accent-glow);
+  color: var(--accent-light);
+  border: 1px solid var(--border);
+  border-radius: 50px;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+/* Match percentage ring colors */
+.match-high { color: var(--green); }
+.match-mid { color: var(--gold); }
+.match-low { color: var(--rose); }
+
+/* Spinner */
+.spinner {
+  width: 40px; height: 40px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Page transitions */
+.page-enter { animation: fadeUp 0.3s ease; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Bottom nav */
+.bottom-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 8px 0 calc(8px + env(safe-area-inset-bottom));
+  z-index: 100;
+  backdrop-filter: blur(12px);
+}
+.nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 6px 2px;
+  color: var(--text-muted);
+  font-size: 9.5px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: color 0.2s;
+  background: none;
+  border: none;
+}
+.nav-item.active { color: var(--accent-light); }
+.nav-item svg { width: 20px; height: 20px; }
+
+/* FAB button */
+.fab {
+  position: fixed;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  right: 20px;
+  width: 56px; height: 56px;
+  background: linear-gradient(135deg, var(--accent), #7C3AED);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 24px;
+  box-shadow: var(--shadow-accent);
+  z-index: 99;
+  transition: all 0.2s;
+}
+.fab:hover { transform: scale(1.1); }
+
+/* Page header */
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 50;
+  border-bottom: 1px solid var(--border);
+}
+.page-header h2 { font-size: 20px; flex: 1; }
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(4px);
+  z-index: 200;
+  display: flex;
+  align-items: flex-end;
+}
+.modal-sheet {
+  background: var(--bg-card);
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 24px 20px calc(24px + env(safe-area-inset-bottom));
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Score bar */
+.score-bar { height: 6px; background: var(--bg-elevated); border-radius: 3px; overflow: hidden; }
+.score-bar-fill { height: 100%; border-radius: 3px; transition: width 0.6s ease; background: linear-gradient(90deg, var(--accent), var(--accent-light)); }
+
+@media (min-width: 480px) {
+  .container { padding: 0 24px; }
+}
+
+/* ── Job status pulse animation ─────────────────────────────────────────── */
+@keyframes pulse-ring {
+  0%   { box-shadow: 0 0 0 0 rgba(139,92,246,0.7); }
+  70%  { box-shadow: 0 0 0 8px rgba(139,92,246,0); }
+  100% { box-shadow: 0 0 0 0 rgba(139,92,246,0); }
+}
+
+/* ── Credits badge variants (OutfitsPage header) ─────────────────────────── */
+.badge-premium {
+  background: rgba(139,92,246,0.25);
+  border: 1px solid rgba(139,92,246,0.3);
+  padding: 4px 12px; border-radius: 50px;
+  font-size: 12px; font-weight: 600; color: #A78BFA;
+}
+.badge-empty {
+  background: rgba(244,63,94,0.15);
+  border: 1px solid transparent;
+  padding: 4px 12px; border-radius: 50px;
+  font-size: 12px; font-weight: 600; color: #F43F5E;
+}
+.badge-default {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid transparent;
+  padding: 4px 12px; border-radius: 50px;
+  font-size: 12px; font-weight: 600; color: #A598C7;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   ✨ ANIMATIONS & VISUAL EFFECTS — Lama Stylers v2.2.3
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Aurora background ────────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(139,92,246,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 50% 35% at 80% 80%, rgba(236,72,153,0.08) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 50% at 60% 30%, rgba(99,102,241,0.07) 0%, transparent 70%);
+  animation: aurora-shift 12s ease-in-out infinite alternate;
+}
+@keyframes aurora-shift {
+  0%   { opacity: 0.7; transform: scale(1)   translateY(0px); }
+  50%  { opacity: 1;   transform: scale(1.05) translateY(-10px); }
+  100% { opacity: 0.8; transform: scale(0.98) translateY(5px); }
+}
+
+/* Đảm bảo content nằm trên aurora */
+#root { position: relative; z-index: 1; }
+
+/* ── 2. Page transitions nâng cao ────────────────────────────────────────── */
+.page-enter {
+  animation: page-slide-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes page-slide-in {
+  from { opacity: 0; transform: translateY(16px) scale(0.99); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ── 3. Card hover — glow + shine sweep ──────────────────────────────────── */
+.card {
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1),
+              border-color 0.25s ease,
+              box-shadow 0.25s ease;
+}
+.card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(105deg, transparent, rgba(255,255,255,0.04), transparent);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+.card:hover {
+  transform: translateY(-3px) scale(1.005);
+  border-color: var(--border-hover);
+  box-shadow: 0 12px 40px rgba(139,92,246,0.2);
+}
+.card:hover::after { left: 150%; }
+
+/* ── 4. Button — press + glow pulse ─────────────────────────────────────── */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(139,92,246,0.45); }
+.btn-primary:hover::before { opacity: 1; }
+.btn-primary:active { transform: translateY(1px) scale(0.97); box-shadow: none; }
+
+/* Ripple effect khi click */
+.btn-primary .ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.25);
+  transform: scale(0);
+  animation: ripple-expand 0.5s linear;
+  pointer-events: none;
+}
+@keyframes ripple-expand {
+  to { transform: scale(4); opacity: 0; }
+}
+
+/* ── 5. FAB — breathe animation ──────────────────────────────────────────── */
+.fab {
+  animation: fab-breathe 3s ease-in-out infinite;
+}
+.fab:hover { animation: none; transform: scale(1.12) rotate(5deg); }
+@keyframes fab-breathe {
+  0%, 100% { box-shadow: 0 4px 24px rgba(139,92,246,0.35); }
+  50%       { box-shadow: 0 4px 36px rgba(139,92,246,0.6); }
+}
+
+/* ── 6. Spinner nâng cao ─────────────────────────────────────────────────── */
+.spinner {
+  width: 36px; height: 36px;
+  border: 3px solid rgba(139,92,246,0.15);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin-glow 0.8s linear infinite;
+  box-shadow: 0 0 12px rgba(139,92,246,0.3);
+}
+@keyframes spin-glow {
+  to { transform: rotate(360deg); }
+}
+
+/* ── 7. Staggered list entry ─────────────────────────────────────────────── */
+.stagger-list > * {
+  animation: stagger-fade-up 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+.stagger-list > *:nth-child(1)  { animation-delay: 0.04s; }
+.stagger-list > *:nth-child(2)  { animation-delay: 0.08s; }
+.stagger-list > *:nth-child(3)  { animation-delay: 0.12s; }
+.stagger-list > *:nth-child(4)  { animation-delay: 0.16s; }
+.stagger-list > *:nth-child(5)  { animation-delay: 0.20s; }
+.stagger-list > *:nth-child(6)  { animation-delay: 0.24s; }
+.stagger-list > *:nth-child(7)  { animation-delay: 0.28s; }
+.stagger-list > *:nth-child(8)  { animation-delay: 0.32s; }
+@keyframes stagger-fade-up {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+
+/* ── 8. Image load fade-in ───────────────────────────────────────────────── */
+img {
+  animation: img-appear 0.4s ease both;
+}
+@keyframes img-appear {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ── 9. Shimmer skeleton nâng cao ────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-elevated) 25%,
+    rgba(139,92,246,0.08) 50%,
+    var(--bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to   { background-position: -200% 0; }
+}
+
+/* ── 10. Glow pulse — dùng cho accent elements ───────────────────────────── */
+.glow-pulse {
+  animation: glow-pulse 2.5s ease-in-out infinite;
+}
+@keyframes glow-pulse {
+  0%, 100% { filter: drop-shadow(0 0 6px  rgba(139,92,246,0.4)); }
+  50%       { filter: drop-shadow(0 0 16px rgba(139,92,246,0.8)); }
+}
+
+/* ── 11. Float — dùng cho avatar/icon ───────────────────────────────────── */
+.float {
+  animation: float 4s ease-in-out infinite;
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0px);  }
+  50%       { transform: translateY(-8px); }
+}
+
+/* ── 12. Notification badge bounce ──────────────────────────────────────── */
+.badge-bounce {
+  animation: badge-bounce 0.5s cubic-bezier(0.36,0.07,0.19,0.97);
+}
+@keyframes badge-bounce {
+  0%,100% { transform: scale(1); }
+  30%     { transform: scale(1.4); }
+  60%     { transform: scale(0.9); }
+}
+
+/* ── 13. Modal overlay blur-in ───────────────────────────────────────────── */
+.modal-overlay {
+  animation: overlay-in 0.25s ease;
+}
+@keyframes overlay-in {
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(4px); }
+}
+
+/* ── 14. Nav item tap feedback ───────────────────────────────────────────── */
+.nav-item {
+  transition: color 0.2s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+}
+.nav-item:active { transform: scale(0.88); }
+.nav-item.active {
+  animation: nav-pop 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes nav-pop {
+  0%  { transform: scale(1); }
+  40% { transform: scale(1.2) translateY(-3px); }
+  100%{ transform: scale(1); }
+}
+
+/* ── 15. Score bar animated fill ─────────────────────────────────────────── */
+.score-bar-fill {
+  animation: bar-grow 0.8s cubic-bezier(0.22,1,0.36,1) both;
+  animation-delay: 0.2s;
+}
+@keyframes bar-grow {
+  from { width: 0 !important; }
+}
+
+/* ── 16. Toast slide-in từ bottom ───────────────────────────────────────── */
+.toast-enter {
+  animation: toast-in 0.35s cubic-bezier(0.22,1,0.36,1);
+}
+.toast-exit {
+  animation: toast-out 0.25s ease forwards;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.95); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateY(0)    scale(1); }
+  to   { opacity: 0; transform: translateY(-12px) scale(0.95); }
+}
+
+/* ── 17. Reduce motion ───────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "lama-stylers",
+  "version": "2.2.8",
+  "private": true,
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "@netlify/functions": "^2.8.1",
+    "firebase-admin": "^12.1.0",
+    "firebase": "^10.12.0",
+    "@google/generative-ai": "^0.11.0",
+    "cloudinary": "^2.10.0",
+    "@sentry/node": "^7.0.0",
+    "adm-zip": "^0.5.10",
+    "zod": "^3.22.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "react-router-dom": "^6.26.0",
+    "dexie": "^4.0.0",
+    "@sentry/react": "^7.0.0",
+    "recharts": "^2.12.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "netlify-cli": "^17.0.0",
+    "@vitejs/plugin-react": "^4.3.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "functions:dev": "netlify functions:serve"
+  }
+}

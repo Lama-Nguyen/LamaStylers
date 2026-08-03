@@ -1,0 +1,177 @@
+rules_version = '2';
+
+// ═══════════════════════════════════════════════════════════════════
+//  Lama Stylers — Firestore Security Rules
+//  Version: 2.2.1  |  2026-07-28
+//
+//  Nguyên tắc:
+//  • Mọi collection mặc định DENY ALL
+//  • Client chỉ đọc/ghi data của chính họ (user-scoped)
+//  • Premium fields (isPremium, premiumExpiry...) — server-only write
+//  • rate_limits, processed_webhooks, generation_locks,
+//    outfit_generation_jobs, transactions  — server-only
+//  • clothing_items hard-delete bị chặn (dùng API deleteClothing)
+// ═══════════════════════════════════════════════════════════════════
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function isAuthed() {
+      return request.auth != null;
+    }
+
+    function isOwnerUid(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function noWritePremiumFields() {
+      return !(request.resource.data.keys().hasAny([
+        'isPremium', 'premiumExpiry', 'premiumSource',
+        'premiumPackage', 'premiumActivatedAt'
+      ]));
+    }
+
+    // credits, lastCreditDate, firstUploadCredited — server-only via Admin SDK.
+    // Client không được tự cộng/trừ; dùng Netlify Functions grantCredits / deductCredits.
+    function noWriteCreditFields() {
+      return !(request.resource.data.keys().hasAny([
+        'credits', 'lastCreditDate', 'firstUploadCredited'
+      ]));
+    }
+
+    function userIdUnchanged() {
+      return !('userId' in request.resource.data.diff(resource.data).affectedKeys());
+    }
+
+    // ── users/{uid} ───────────────────────────────────────────────
+    match /users/{uid} {
+      allow read: if isOwnerUid(uid);
+      allow create: if isOwnerUid(uid) && noWritePremiumFields() && noWriteCreditFields();
+      allow update: if isOwnerUid(uid) && noWritePremiumFields() && noWriteCreditFields();
+      allow delete: if isOwnerUid(uid);
+    }
+
+    // ── clothing_items/{itemId} ───────────────────────────────────
+    // Hard-delete chặn hoàn toàn — client dùng API deleteClothing
+    match /clothing_items/{itemId} {
+      allow read:   if isAuthed() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthed() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthed()
+        && resource.data.userId == request.auth.uid
+        && userIdUnchanged();
+      allow delete: if false;
+    }
+
+    // ── pending_uploads/{imagePublicId} ───────────────────────────
+    match /pending_uploads/{imagePublicId} {
+      allow read:   if isAuthed() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthed() && request.resource.data.uid == request.auth.uid;
+      allow delete: if isAuthed() && resource.data.uid == request.auth.uid;
+      allow update:  if false;
+    }
+
+    // ── outfits/{outfitId} ────────────────────────────────────────
+    match /outfits/{outfitId} {
+      allow read:   if isAuthed() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthed() && request.resource.data.userId == request.auth.uid;
+      allow update: if isAuthed()
+        && resource.data.userId == request.auth.uid
+        && userIdUnchanged();
+      allow delete: if isAuthed() && resource.data.userId == request.auth.uid;
+    }
+
+    // ── favorites/{favId} ─────────────────────────────────────────
+    match /favorites/{favId} {
+      allow read:   if isAuthed() && resource.data.userId == request.auth.uid;
+      allow create: if isAuthed() && request.resource.data.userId == request.auth.uid;
+      allow delete: if isAuthed() && resource.data.userId == request.auth.uid;
+      allow update: if false;
+    }
+
+    // ── outfit_feedback/{uid}_{outfitId} ────────────────────────────
+    // Đọc để biết đã vote outfit này chưa (hiện đúng trạng thái nút 👍/👎).
+    // Ghi CHỈ qua server (submitOutfitFeedback.js, Admin SDK) — cần transaction
+    // đọc-sửa-đúng khi đổi vote, không an toàn nếu để client tự ghi.
+    match /outfit_feedback/{feedbackId} {
+      allow read:  if isAuthed() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // ── notifications/{notifId} ───────────────────────────────────
+    // Create: server only. Update: chỉ isRead field.
+    match /notifications/{notifId} {
+      allow read:   if isAuthed() && resource.data.userId == request.auth.uid;
+      allow update: if isAuthed()
+        && resource.data.userId == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['isRead']);
+      allow delete: if isAuthed() && resource.data.userId == request.auth.uid;
+      allow create: if false;
+    }
+
+    // ── outfit_generation_jobs/{jobId} ────────────────────────────
+    match /outfit_generation_jobs/{jobId} {
+      allow read:  if isAuthed() && resource.data.uid == request.auth.uid;
+      allow write: if false;
+    }
+
+    // ── havy_quota/{uid}/daily/{dateKey} ─────────────────────────
+    match /havy_quota/{uid}/daily/{dateKey} {
+      allow read, write: if false;
+    }
+
+    // ── rate_limits — server only ─────────────────────────────────
+    match /rate_limits/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── processed_webhooks — server only ─────────────────────────
+    match /processed_webhooks/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── transactions ──────────────────────────────────────────────
+    // Client: create own pending txn, read own, cancel (pending→cancelled) own.
+    // Server: set completed/underpaid (write via Admin SDK, bypasses rules).
+    match /transactions/{txnId} {
+      // Read own transaction (để onSnapshot theo dõi status)
+      allow read: if isAuthed() && resource.data.userId == request.auth.uid;
+
+      // Create: chỉ pending, chỉ của chính mình, không cho set status bất kỳ giá trị nào khác
+      allow create: if isAuthed()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'pending';
+
+      // Update: chỉ được đổi status pending → cancelled (cancel từ client)
+      allow update: if isAuthed()
+        && resource.data.userId == request.auth.uid
+        && resource.data.status == 'pending'
+        && request.resource.data.status == 'cancelled'
+        && request.resource.data.diff(resource.data).affectedKeys()
+             .hasOnly(['status', 'cancelledAt']);
+    }
+
+    // ── feedbacks ─────────────────────────────────────────────────
+    // Client: create only (authenticated). Read/edit/delete = server/admin only.
+    match /feedbacks/{fbId} {
+      allow create: if isAuthed()
+        && request.resource.data.userId == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // ── generation_locks — server only ────────────────────────────
+    match /generation_locks/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── _health — server only ─────────────────────────────────────
+    match /_health/{docId} {
+      allow read, write: if false;
+    }
+
+    // ── CATCH-ALL DENY ────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
